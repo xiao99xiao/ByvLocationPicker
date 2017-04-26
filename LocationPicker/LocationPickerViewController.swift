@@ -30,6 +30,18 @@ open class LocationPickerViewController: UIViewController {
 	/// see `region` property of `MKLocalSearchRequest`
 	/// default: false
 	public var useCurrentLocationAsHint = false
+    
+    /// default: true
+    public var showCurrentLocationInSearch = true {
+        didSet {
+            if isViewLoaded {
+                results.showCurrentLocationSection = showCurrentLocationInSearch
+            }
+        }
+    }
+    
+    /// default: "My location"
+    public var currentLocationName = "My location"
 	
 	/// default: "Search or enter an address"
 	public var searchBarPlaceholder = "Search or enter an address"
@@ -60,6 +72,9 @@ open class LocationPickerViewController: UIViewController {
 			}
 		}
 	}
+    
+    /// default: .green
+    public var pinColor:MKPinAnnotationColor = .green
 	
 	public var location: Location? {
 		didSet {
@@ -87,6 +102,7 @@ open class LocationPickerViewController: UIViewController {
 		let results = LocationSearchResultsViewController()
 		results.onSelectLocation = { [weak self] in self?.selectedLocation($0) }
 		results.searchHistoryLabel = self.searchHistoryLabel
+        results.showCurrentLocationSection = self.showCurrentLocationInSearch
 		return results
 	}()
 	
@@ -129,6 +145,16 @@ open class LocationPickerViewController: UIViewController {
 			view.addSubview(button)
 			locationButton = button
 		}
+        
+        let listener = CurrentLocationListener(once: false) { [weak self] location in
+            self?.geocoder.reverseGeocodeLocation(location, completionHandler: { (placemarks, error) in
+                if let placemarks = placemarks, placemarks.count > 0 {
+                    let myLocation = Location(name: self?.currentLocationName, location: location, placemark: placemarks[0])
+                    self?.results.currenLocation = myLocation
+                }
+            })
+        }
+        currentLocationListeners.append(listener)
 	}
 	
 	open override func viewDidLoad() {
@@ -225,7 +251,7 @@ extension LocationPickerViewController: CLLocationManagerDelegate {
 		guard let location = locations.first else { return }
         currentLocationListeners.forEach { $0.action(location) }
 		currentLocationListeners = currentLocationListeners.filter { !$0.once }
-		manager.stopUpdatingLocation()
+		if currentLocationListeners.isEmpty { manager.stopUpdatingLocation() }
 	}
 }
 
@@ -311,7 +337,7 @@ extension LocationPickerViewController {
 			
 			geocoder.cancelGeocode()
 			geocoder.reverseGeocodeLocation(location) { response, error in
-				if let error = error as? NSError, error.code != 10 { // ignore cancelGeocode errors
+				if let error = error as NSError?, error.code != 10 { // ignore cancelGeocode errors
 					// show error and remove annotation
 					let alert = UIAlertController(title: nil, message: error.localizedDescription, preferredStyle: .alert)
 					alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { _ in }))
@@ -337,7 +363,7 @@ extension LocationPickerViewController: MKMapViewDelegate {
 		if annotation is MKUserLocation { return nil }
 		
 		let pin = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "annotation")
-		pin.pinColor = .green
+		pin.pinColor = pinColor
 		// drop only on long press gesture
 		let fromLongPress = annotation is MKPointAnnotation
 		pin.animatesDrop = fromLongPress

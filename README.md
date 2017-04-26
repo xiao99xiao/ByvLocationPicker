@@ -18,7 +18,7 @@ github "almassapargali/LocationPicker"
 ### CocoaPods
 
 ```
-pod 'LocationPicker'
+pod 'ByvLocationPicker'
 ```
 
 ## Screenshots

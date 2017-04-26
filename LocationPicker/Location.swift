@@ -51,4 +51,8 @@ extension Location: MKAnnotation {
     public var title: String? {
 		return name ?? address
 	}
+    
+    public var subtitle: String? {
+        return name != nil ? address : nil
+    }
 }
