@@ -157,6 +157,7 @@ open class LocationPickerViewController: UIViewController {
                 }
             })
         }
+        currentLocationListeners.removeAll()
         currentLocationListeners.append(listener)
     }
     
@@ -231,6 +232,7 @@ open class LocationPickerViewController: UIViewController {
         let listener = CurrentLocationListener(once: true) { [weak self] location in
             self?.showCoordinates(location.coordinate, animated: animated)
         }
+        currentLocationListeners.removeAll()
         currentLocationListeners.append(listener)
         getCurrentLocation()
     }
