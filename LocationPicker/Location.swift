@@ -9,6 +9,7 @@
 import Foundation
 
 import CoreLocation
+import Contacts
 import AddressBookUI
 
 // class because protocol
@@ -27,7 +28,8 @@ public class Location: NSObject {
 				return lines.joined(separator: ", ")
 			} else {
 				// fallback
-				return ABCreateStringWithAddressDictionary(addressDic, true)
+                guard let postalAddress = CNMutablePostalAddress(placemark: placemark) else { return "" }
+                return String.init(CNPostalAddressFormatter().string(from: postalAddress))
 			}
 		} else {
 			return "\(coordinate.latitude), \(coordinate.longitude)"
@@ -39,6 +41,27 @@ public class Location: NSObject {
 		self.location = location ?? placemark.location!
 		self.placemark = placemark
 	}
+}
+
+extension Optional {
+    func then(_ f: (Wrapped) -> Void) {
+        if let wrapped = self { f(wrapped) }
+    }
+}
+
+extension CNMutablePostalAddress {
+    convenience init?(placemark: CLPlacemark?) {
+        self.init()
+        guard let placemark = placemark else { return nil }
+        
+        placemark.subThoroughfare    .then { street += $0 + " " }
+        placemark.thoroughfare       .then { street += $0 }
+        placemark.locality           .then { city = $0 }
+        placemark.administrativeArea .then { state = $0 }
+        placemark.postalCode         .then { postalCode = $0 }
+        placemark.country            .then { country = $0 }
+        placemark.isoCountryCode     .then { isoCountryCode = $0 }
+    }
 }
 
 import MapKit

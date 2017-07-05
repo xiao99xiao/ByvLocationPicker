@@ -76,7 +76,7 @@ open class LocationPickerViewController: UIViewController {
     }
     
     /// default: .green
-    public var pinColor:MKPinAnnotationColor = .green
+    public var pinColor:UIColor = .green
     
     public var location: Location? {
         didSet {
@@ -366,7 +366,7 @@ extension LocationPickerViewController: MKMapViewDelegate {
         if annotation is MKUserLocation { return nil }
         
         let pin = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "annotation")
-        pin.pinColor = pinColor
+        pin.pinTintColor = pinColor
         // drop only on long press gesture
         let fromLongPress = annotation is MKPointAnnotation
         pin.animatesDrop = fromLongPress
