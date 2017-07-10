@@ -127,7 +127,9 @@ open class LocationPickerViewController: UIViewController {
         localSearch?.cancel()
         geocoder.cancelGeocode()
         // http://stackoverflow.com/questions/32675001/uisearchcontroller-warning-attempting-to-load-the-view-of-a-view-controller/
-        let _ = searchController.view
+        if searchController.view != nil {
+            let _ = searchController.view
+        }
     }
     
     open override func loadView() {
