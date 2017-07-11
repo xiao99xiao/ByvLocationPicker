@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name     = 'ByvLocationPicker'
-  s.version  = '1.0.5'
+  s.version  = '1.0.8'
   s.author   = { 'Adrian Apodaca' => 'adrian@byvapps.com' }
   s.homepage = 'https://github.com/adrianByv/ByvLocationPicker.git'
   s.description = "LocationPickerViewController is a UIViewController subclass to let users choose locations by searching or selecting on map. It's designed to work as UIImagePickerController. (forked from almassapargali/LocationPicker)"
